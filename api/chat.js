@@ -26,7 +26,7 @@ module.exports = async function handler(req, res) {
     openRouterMessages.push(...messages);
 
     const response = await fetch(
-      'https://openrouter.ai/api/v1/chat/completions',
+      'https://openrouter.ai/api/v1/chat/completions'
       {
         method: 'POST',
         headers: {
