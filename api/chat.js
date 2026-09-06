@@ -14,27 +14,53 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
-        system: system || '',
-        messages
-      })
-    });
+    const openRouterMessages = [];
+
+    if (system) {
+      openRouterMessages.push({
+        role: 'system',
+        content: system
+      });
+    }
+
+    openRouterMessages.push(...messages);
+
+    const response = await fetch(
+      'https://openrouter.ai/api/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'HTTP-Referer': 'https://design-flow-ai-eta.vercel.app',
+          'X-Title': 'DesignFlow AI'
+        },
+        body: JSON.stringify({
+          model: 'openrouter/free',
+          messages: openRouterMessages,
+          max_tokens: 1024
+        })
+      }
+    );
 
     const data = await response.json();
 
-    return res.status(response.status).json(data);
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: {
+          message:
+            data?.error?.message ||
+            'حدث خطأ في خدمة الذكاء الاصطناعي'
+        }
+      });
+    }
+
+    return res.status(200).json({
+      content: data.choices?.[0]?.message?.content || ''
+    });
 
   } catch (error) {
-    console.error('Anthropic API error:', error);
+    console.error('OpenRouter API error:', error);
 
     return res.status(500).json({
       error: {
