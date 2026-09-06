@@ -36,7 +36,7 @@ module.exports = async function handler(req, res) {
           'X-Title': 'DesignFlow AI'
         },
         body: JSON.stringify({
-          model: 'openai/gpt-oss-20b:free'
+          model: 'openai/gpt-oss-20b:free',
           messages: openRouterMessages,
           max_tokens: 1024
         })
